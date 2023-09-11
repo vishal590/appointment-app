@@ -2,8 +2,13 @@ import express from "express";
 import colors from 'colors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import connectDB from "./config/db.js";
+import authRoute from './routes/userRoutes.js'
 
 dotenv.config();
+
+// mongodb connection
+connectDB();
 
 // rest object
 const app = express();
@@ -12,13 +17,8 @@ const app = express();
 app.use(express.json());  // to avoid parse issue
 app.use(morgan('dev'));
 
-
 // routes
-app.get('/', (req, res) => {
-    res.status(200).send({
-        message: 'server is running',
-    })
-})
+app.use('/api/v1/user', authRoute);
 
 
 const port = process.env.PORT || 8080;
