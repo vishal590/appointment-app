@@ -1,6 +1,7 @@
 import userModel from "../models/userModels.js"
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import doctorModel from "../models/doctorModel.js";
 
 //  register callback
 export const registerController  = async (req, res) => {
@@ -86,6 +87,60 @@ export const authController = async (req, res) => {
         res.status(500).send({
             success: false,
             message: 'Auth Error (500)',
+            error,
+        })
+    }
+}
+
+export const applyDoctorController = async(req, res) => {
+    try{
+        const newDoctor = await doctorModel({...req.body, status: 'pending'})
+        await newDoctor.save();
+        const adminUser = await userModel.findOne({isAdmin: true})
+        const notification = adminUser.notification;
+        notification.push({
+            type: 'apply-doctor-request',
+            message: `${newDoctor.firstName} ${newDoctor.lastName} has applied for doctor account`,
+            data: {
+                doctorId: newDoctor._id,
+                name: newDoctor.firstName + " " + newDoctor.lastName,
+                onClickPath: '/admin/doctors',
+            }
+        })
+        await userModel.findByIdAndUpdate(adminUser._id, {notification});
+        res.status(201).send({
+            success: true,
+            message: 'Doctor Account creted successfully'
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: `Internal server error (applyDoctorController)`.bgRed,
+            error,
+        })
+    }
+}
+
+export const getAllNotificationController = async (req, res) => {
+    try{
+        const user = await userModel.findOne({_id: req.body.userId})
+        const seenotification = user.seenotification;
+        const notification = user.notification;
+        seenotification.push(...notification);
+        user.notification = [];
+        user.seenotification = notification;
+        const updateUser = await user.save();
+        res.status(200).send({
+            success: true,
+            message: 'all notification mark as read',
+            data: updateUser,
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: 'Bad request (getAllNotification)',
             error,
         })
     }

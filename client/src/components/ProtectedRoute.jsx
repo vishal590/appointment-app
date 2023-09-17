@@ -35,7 +35,9 @@ const ProtectedRoute = ({children}) => {
    }
 
    useEffect(() => {
+      if(!user){
       getUser();
+      }
    }, [user])
    
    // useEffect(() => {
