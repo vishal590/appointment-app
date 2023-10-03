@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import connectDB from "./config/db.js";
 import authRoute from './routes/userRoutes.js'
+import adminRoute from './routes/adminRoutes.js'
+import doctorRoute from './routes/doctorRoutes.js'
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(morgan('dev'));
 
 // routes
 app.use('/api/v1/user', authRoute);
+app.use('/api/v1/admin', adminRoute);
+app.use('/api/v1/doctor', doctorRoute);
 
 
 const port = process.env.PORT || 8080;
